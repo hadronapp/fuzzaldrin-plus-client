@@ -1,0 +1,13 @@
+{
+  "name": "fuzzaldrin-plus-bower",
+  "version": "0.0.0",
+  "description": "fuzzaldrin-plus to use on the client via Browserify",
+  "author": "Pedro Garcia <pdgago@gmail.com>",
+  "dependencies": {
+    "coffeeify": "~0.5.2",
+    "fuzzaldrin-plus": "^0.2.0",
+    "gulp": "~3.3.1",
+    "gulp-browserify": "https://github.com/deepak1556/gulp-browserify/tarball/master",
+    "gulp-concat": "~2.1.7"
+  }
+}
