@@ -78,7 +78,7 @@ fuzzaldrinPlus = require('./node_modules/fuzzaldrin-plus/lib/fuzzaldrin');
 
 },{"./legacy":4,"./scorer":6,"path":7}],3:[function(require,module,exports){
 (function() {
-  var PathSeparator, filter, legacy_scorer, matcher, scorer;
+  var PathSeparator, filter, legacy_scorer, matcher, prepQueryCache, scorer;
 
   scorer = require('./scorer');
 
@@ -89,6 +89,8 @@ fuzzaldrinPlus = require('./node_modules/fuzzaldrin-plus/lib/fuzzaldrin');
   matcher = require('./matcher');
 
   PathSeparator = require('path').sep;
+
+  prepQueryCache = null;
 
   module.exports = {
     filter: function(candidates, query, options) {
@@ -107,7 +109,7 @@ fuzzaldrinPlus = require('./node_modules/fuzzaldrin-plus/lib/fuzzaldrin');
         return 0;
       }
       if (prepQuery == null) {
-        prepQuery = scorer.prepQuery(query);
+        prepQuery = prepQueryCache && prepQueryCache.query === query ? prepQueryCache : (prepQueryCache = scorer.prepQuery(query));
       }
       if (!legacy) {
         score = scorer.score(string, query, prepQuery, !!allowErrors);
@@ -138,7 +140,7 @@ fuzzaldrinPlus = require('./node_modules/fuzzaldrin-plus/lib/fuzzaldrin');
         }).apply(this);
       }
       if (prepQuery == null) {
-        prepQuery = scorer.prepQuery(query);
+        prepQuery = prepQueryCache && prepQueryCache.query === query ? prepQueryCache : (prepQueryCache = scorer.prepQuery(query));
       }
       if (!(allowErrors || scorer.isMatch(string, prepQuery.core_lw, prepQuery.core_up))) {
         return [];
@@ -440,7 +442,7 @@ fuzzaldrinPlus = require('./node_modules/fuzzaldrin-plus/lib/fuzzaldrin');
 
 },{"./scorer":6,"path":7}],6:[function(require,module,exports){
 (function() {
-  var AcronymResult, PathSeparator, Query, basenameScore, coreChars, countDir, doScore, emptyAcronymResult, file_coeff, isMatch, isSeparator, isWordEnd, isWordStart, miss_coeff, opt_char_re, pos_bonus, scoreAcronyms, scoreCharacter, scoreConsecutives, scoreExact, scoreExactMatch, scorePattern, scorePosition, scoreSize, tau_depth, tau_size, wm;
+  var AcronymResult, PathSeparator, Query, basenameScore, coreChars, countDir, doScore, emptyAcronymResult, file_coeff, isMatch, isSeparator, isWordEnd, isWordStart, miss_coeff, opt_char_re, pos_bonus, scoreAcronyms, scoreCharacter, scoreConsecutives, scoreExact, scoreExactMatch, scorePattern, scorePosition, scoreSize, tau_depth, tau_size, truncatedUpperCase, wm;
 
   PathSeparator = require('path').sep;
 
@@ -487,7 +489,7 @@ fuzzaldrinPlus = require('./node_modules/fuzzaldrin-plus/lib/fuzzaldrin');
       this.query_lw = query.toLowerCase();
       this.core = coreChars(query);
       this.core_lw = this.core.toLowerCase();
-      this.core_up = this.core.toUpperCase();
+      this.core_up = truncatedUpperCase(this.core);
       this.depth = countDir(query, query.length);
     }
 
@@ -503,7 +505,7 @@ fuzzaldrinPlus = require('./node_modules/fuzzaldrin-plus/lib/fuzzaldrin');
     var i, j, m, n, qj_lw, qj_up, si;
     m = subject.length;
     n = query_lw.length;
-    if (!m || !n || n > m) {
+    if (!m || n > m) {
       return false;
     }
     i = -1;
@@ -813,6 +815,16 @@ fuzzaldrinPlus = require('./node_modules/fuzzaldrin-plus/lib/fuzzaldrin');
       }
     }
     return count;
+  };
+
+  truncatedUpperCase = function(str) {
+    var char, upper, _i, _len;
+    upper = "";
+    for (_i = 0, _len = str.length; _i < _len; _i++) {
+      char = str[_i];
+      upper += char.toUpperCase()[0];
+    }
+    return upper;
   };
 
 }).call(this);
